@@ -299,15 +299,23 @@ and then use the BLE_CUS_DEF macro to add a custom service instance called m_cus
 BLE_CUS_DEF(m_cus);
 ``` 
 
-The next step is to find the empty services_init function in main.c, which should look like this
+The next step is to find the unpopulated services_init function in main.c, which should look like this
 
 ```c
 /**@brief Function for initializing services that will be used by the application.
  */
 static void services_init(void)
 {
+    ret_code_t         err_code;
+    nrf_ble_qwr_init_t qwr_init = {0};
+
+    // Initialize Queued Write Module.
+    qwr_init.error_handler = nrf_qwr_error_handler;
+
+    err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
+    APP_ERROR_CHECK(err_code);
+
     /* YOUR_JOB: Add code to initialize the services used by the application.
-       ret_code_t                         err_code;
        ble_xxs_init_t                     xxs_init;
        ble_yys_init_t                     yys_init;
 
@@ -335,12 +343,33 @@ static void services_init(void)
 Ok, we're going to do as we're told, i.e. create a ble_cus_init_t struct and populate it with the necessary data and then pass it as an argument to our service init function ble_cus_init();
 
 ```c
+/* YOUR_JOB: Add code to initialize the services used by the application.*/
+ble_cus_init_t                     cus_init;
+
+// Initialize CUS Service init structure to zero.
+memset(&cus_init, 0, sizeof(cus_init));
+
+err_code = ble_cus_init(&m_cus, &cus_init);
+APP_ERROR_CHECK(err_code);
+```
+
+The services_init function should now look like this:
+
+```c
 /**@brief Function for initializing services that will be used by the application.
  */
 static void services_init(void)
 {
+    ret_code_t          err_code;
+    nrf_ble_qwr_init_t  qwr_init = {0};
+
+    // Initialize Queued Write Module.
+    qwr_init.error_handler = nrf_qwr_error_handler;
+
+    err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
+    APP_ERROR_CHECK(err_code);
+
     /* YOUR_JOB: Add code to initialize the services used by the application.*/
-    ret_code_t                         err_code;
     ble_cus_init_t                     cus_init;
 
      // Initialize CUS Service init structure to zero.
